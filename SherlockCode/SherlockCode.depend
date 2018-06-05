@@ -1,0 +1,16 @@
+# depslib dependency file v1.0
+1527964049 source:c:\users\Òscar cortes\desktop\ic 1s-18\analisis de algoritmos\tarea 2 - sherlock\sherlockcode\main.c
+	<stdio.h>
+	<stdlib.h>
+	<assert.h>
+	<string.h>
+	"Population.c"
+
+1527194720 c:\users\Òscar cortes\desktop\ic 1s-18\analisis de algoritmos\tarea 2 - sherlock\sherlockcode\population.c
+	<time.h>
+	<stdlib.h>
+
+1527194720 source:c:\users\Òscar cortes\desktop\ic 1s-18\analisis de algoritmos\tarea 2 - sherlock\sherlockcode\population.c
+	<time.h>
+	<stdlib.h>
+

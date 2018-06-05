@@ -1,0 +1,2 @@
+Texto de prueba para leer archivos
+12345
