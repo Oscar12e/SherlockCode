@@ -6,10 +6,9 @@ typedef struct Population Population, *ptrPopulation;
 
 
 #define _GNU_SOURCE
-char** splitText(char* pText, char pDelimeter);
-char** str_split(char* a_str, const char a_delim);
-
 int getFileLines(char* filename);
+char* fileToString(char* filename);
+int getFileLines2(char* filename);
 
 int findVariablesTraces();
 int findRepeatedCodeTraces();
@@ -64,8 +63,33 @@ int findMagicNumberTraces(){
 
 }
 
+/**
+    Returns the number of lines contain in the file.
 
-int getFileLines(char* filename){
+    @param filename: the name of the file thats going to be used.
+    @return the number of lines.
+*/
+
+int getFileLines(char * const pSringText){
+    int lines = 0;
+    size_t stringLenght = strlen(pSringText);
+
+    if (stringLenght != 0){
+        lines++;
+        for (int currentChar = 0; currentChar < stringLenght; currentChar++) {
+          if(pSringText[currentChar] == '\n')
+            lines++;
+
+        }
+    }
+
+    //14693
+    return lines;
+}
+
+
+
+int getFileLines2(char* filename){
     FILE *fp = fopen(filename,"r");
     int ch = 0;
     int lines = 0;
@@ -83,147 +107,56 @@ int getFileLines(char* filename){
     return lines;
 }
 
+char* fileToString(char* filename){
+    FILE *filePointer = fopen(filename, "r");
 
+    if (filePointer == NULL){
+        printf("No funco");
+        return NULL;
+    }
+
+    fseek (filePointer, 0, SEEK_END);
+    long fileLenght =  ftell(filePointer);
+
+    fseek (filePointer, 0, SEEK_SET);
+    char* body = malloc(fileLenght);
+    fread(body, 1, fileLenght, filePointer);
+
+    return body;
+}
 
 
 int main(){
-    printf("Hello world!\n");
     printf("Tarea Corta 2-10%\tGeneticos y paralelos\n");
     printf("Oscar Cortes Cordero\t20116136191\n\n");
 
 
+    Population* testPopulation = population_new();
+    addSubject(testPopulation, 1);
+    //End
+
+    char * const fileString = (char * const) fileToString("Codes/J-ArrayList.jar");
+    puts("The hell:");
+
+    puts("Amount2: ");
+    printf("%d", strlen(fileString) );
+
+
+    int linesAmount = getFileLines(fileString); //O(n)
+    puts("Counter done\n");
+    printf("Lines: %d", linesAmount);
+
+    printf("\nEnd");
+
+    printf("%d", getFileLines2("Codes/J-ArrayList.jar"));
+    return 0;
+}
+
+
+//Testing C awesomeness
+    /*
     unsigned short short1 = 32;
     unsigned short short2 = 128;
     unsigned short short3 = short1 | short2;
     printf("a: %hu\n", short3);
-
-    Population* testPopulation = population_new();
-    addSubject(testPopulation, 1);
-
-    int linesAmount = getFileLines("Codes/J-ArrayList.jar"); //O(n)
-    FILE* f;
-    puts("Counter done\n");
-
-    puts("Amount: ");
-
-    printf("%d", linesAmount);
-
-    puts("\n");
-
-    f = fopen("Codes/J-ArrayList.jar", "r");
-
-    if (f == NULL){
-        printf("No funco");
-    }
-
-    char* body = malloc(sizeof(char*));
-    int bodySize = 0;
-    char ch = 0;
-
-    while (!feof(f)){
-        ch = fgetc(f);
-        body[bodySize] = ch;
-
-    }
-
-    char * const * body2 = (char * const * )body;
-    printf("%d", strlen(body2) );
-
-    printf("\nEnd");
-    return 0;
-}
-
-
-
-/**
- * Takes the code text and split it by ";", eliminates innecesary spaces as well.
- **/
-char ** codeParser(char* pCode){
-    return 0;
-}
-
-
-//Internet split
-char** str_split(char* a_str, const char a_delim)
-{
-    char** result    = 0;
-    size_t count     = 0;
-    char* tmp        = a_str;
-    char* last_comma = 0;
-    char delim[2];
-    delim[0] = a_delim;
-    delim[1] = 0;
-
-    /* Count how many elements will be extracted. */
-    while (*tmp)
-    {
-        if (a_delim == *tmp)
-        {
-            count++;
-            last_comma = tmp;
-        }
-        tmp++;
-    }
-
-    /* Add space for trailing token. */
-    count += last_comma < (a_str + strlen(a_str) - 1);
-
-    /* Add space for terminating null string so caller
-       knows where the list of returned strings ends. */
-    count++;
-
-    result = malloc(sizeof(char*) * count);
-
-    if (result)
-    {
-        size_t idx  = 0;
-        char* token = strtok(a_str, delim);
-
-        while (token)
-        {
-            assert(idx < count);
-            *(result + idx++) = strdup(token);
-            token = strtok(0, delim);
-        }
-        assert(idx == count - 1);
-        *(result + idx) = 0;
-    }
-
-    return result;
-}
-
-char** splitText(char* pText, char pDelimeter){
-    char * piece = 0;
-    int pieceLenght = 0;
-    char ** result;
-    int resultLenght = 0;
-
-    printf(pText);
-    printf("Really");
-
-    while(*pText){
-        printf("in");
-        if (*pText == pDelimeter){
-            if (pieceLenght != 0){
-                printf("Tere");
-                *(result + resultLenght) = piece;
-                pieceLenght = 0;
-                *piece = 0;
-                resultLenght++;
-                }
-        } else {
-            printf("Oh boy");
-            *(piece + pieceLenght) = *pText;
-            pieceLenght++;
-        }
-        pText++;
-   }
-
-   printf("Out");
-
-   *(result + resultLenght) = 0;
-   return result;
-}
-
-
-
+    */
