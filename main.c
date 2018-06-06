@@ -4,6 +4,7 @@
 #include <string.h>
 typedef struct Population Population, *ptrPopulation;
 
+
 #define _GNU_SOURCE
 char** splitText(char* pText, char pDelimeter);
 char** str_split(char* a_str, const char a_delim);
