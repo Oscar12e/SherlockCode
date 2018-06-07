@@ -2,53 +2,22 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
+#include <dirent.h>
+
 typedef struct Population Population, *ptrPopulation;
 
-
-#define _GNU_SOURCE
 int getFileLines(char* filename);
 char* fileToString(char* filename);
-int getFileLines2(char* filename);
-
+char** loadFilesList();
 int findVariablesTraces();
 int findRepeatedCodeTraces();
 int findExceptionTraces();
 int findMagicNumberTraces();
 
-int findVariablesTraces(){
-    const char * blackListVaribles[] = {"temp", "i", "j", "x"};
-    FILE* f;
-    char singleLine[300];
 
-    f = fopen("Codes/J-ArrayList.jar", "r");
 
-    if (f == NULL){
-        printf("No funco");
-    }
+int findVariablesTraces(const char * text){
 
-    while (!feof(f)){
-        fgets(singleLine, 300, f);
-        ///puts(singleLine);
-    }
-    fclose(f);
-
-    char months[] = "JAN,FEB,MAR,APR,MAY,JUN,JUL,AUG,SEP,OCT,NOV,DEC";
-    char s[2] = ",";
-    char* token = strtok(months, s);
-    printf("f");
-
-    while( token != NULL ) {
-      printf(token);
-
-      token = strtok(NULL, s);
-   }
-   //Buscar las palabras reservadas en paralelo, tomar el más corto y luego hacer split
-   char str[] = "sdfad abc GGGGGGGGG";
-   char* result = strstr(str, "abc");
-   int position = result - str;
-   int substringLength = strlen(str) - position;
-
-   puts(result);
 }
 
 int findRepeatedCodeTraces(){
@@ -62,6 +31,8 @@ int findExceptionTraces(){
 int findMagicNumberTraces(){
 
 }
+
+
 
 /**
     Returns the number of lines contain in the file.
@@ -79,33 +50,11 @@ int getFileLines(char * const pSringText){
         for (int currentChar = 0; currentChar < stringLenght; currentChar++) {
           if(pSringText[currentChar] == '\n')
             lines++;
-
         }
     }
-
-    //14693
     return lines;
 }
 
-
-
-int getFileLines2(char* filename){
-    FILE *fp = fopen(filename,"r");
-    int ch = 0;
-    int lines = 0;
-
-    if (fp == NULL)
-        return 0;
-
-    lines++;
-    while(!feof(fp)){
-      if(fgetc(fp) == '\n')
-        lines++;
-    }
-
-    fclose(fp);
-    return lines;
-}
 
 char* fileToString(char* filename){
     FILE *filePointer = fopen(filename, "r");
@@ -125,15 +74,44 @@ char* fileToString(char* filename){
     return body;
 }
 
+char** loadFilesList(){
+    DIR *dir;
+    struct dirent *ent;
+    char** fileNames = (char **) malloc(sizeof(char*));
+    int fileAmount = 0;
+
+    if ((dir = opendir ("Codes")) != NULL) { // print all the files and directories within directory
+        while ((ent = readdir (dir)) != NULL){
+
+            if (ent->d_namlen > 4){ //Cualquier file más largo que .jar se toma en cuenta
+                *(fileNames + fileAmount) = strdup(ent->d_name);
+                fileAmount++;
+            }
+
+        }
+        closedir (dir);
+    } else {
+      /* could not open directory */
+      return NULL;
+    }
+    *(fileNames + fileAmount) = NULL;
+
+    return fileNames;
+}
 
 int main(){
     printf("Tarea Corta 2-10%\tGeneticos y paralelos\n");
     printf("Oscar Cortes Cordero\t20116136191\n\n");
+    printf("Los codigos a evaluarse son:\n");
 
 
-    Population* testPopulation = population_new();
-    addSubject(testPopulation, 1);
-    //End
+    char** fileNames = loadFilesList(); //The program files from Code/ are called
+    int currentFile = 0;
+    while (*(fileNames + currentFile) != NULL) {
+        printf( *(fileNames + currentFile) );
+        printf("\n");
+        currentFile++;
+    }
 
     char * const fileString = (char * const) fileToString("Codes/J-ArrayList.jar");
     puts("The hell:");
@@ -141,22 +119,24 @@ int main(){
     puts("Amount2: ");
     printf("%d", strlen(fileString) );
 
-
     int linesAmount = getFileLines(fileString); //O(n)
     puts("Counter done\n");
     printf("Lines: %d", linesAmount);
 
     printf("\nEnd");
 
-    printf("%d", getFileLines2("Codes/J-ArrayList.jar"));
     return 0;
 }
 
 
 //Testing C awesomeness
-    /*
+/*
     unsigned short short1 = 32;
     unsigned short short2 = 128;
     unsigned short short3 = short1 | short2;
     printf("a: %hu\n", short3);
-    */
+
+    Population* testPopulation = population_new();
+    addSubject(testPopulation, 1);
+    //End
+*/
