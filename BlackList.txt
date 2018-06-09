@@ -1,11 +1,14 @@
-temp
-Temp
-temporal
-Temporal
+temp 
+Temp 
+tmp
+Tmp
+temporal 
+Temporal 
 index
 Index
 counter
 Counter
+int
 i
 I
 n
@@ -18,3 +21,6 @@ a
 A
 e
 E
+x
+X
+s
