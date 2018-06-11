@@ -18,10 +18,11 @@
 	<time.h>
 	<stdlib.h>
 
-1528437728 source:c:\users\Òscar cortes\documents\github\sherlockcode\main.c
+1528686017 source:c:\users\Òscar cortes\documents\github\sherlockcode\main.c
 	<stdio.h>
 	<stdlib.h>
 	<assert.h>
 	<string.h>
 	<dirent.h>
+	<ctype.h>
 

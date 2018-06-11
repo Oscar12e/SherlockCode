@@ -3,14 +3,26 @@
 #include <assert.h>
 #include <string.h>
 #include <dirent.h>
+#include <ctype.h>
+//#include "parallel.h"
+
+#define LINES_TO_COMPARE_AGAINST 0
+#define LINES_TO_COMPARE 0
+
+#define VARIABLES_WEIGHT 0
+#define MAGIC_NUMBERS_WEIGHT 0
+#define EXCEPTION_WEIGHT 0
+#define REPEATED_CODE_WEIGHT 0
+
 
 typedef struct Population Population, *ptrPopulation;
 
 int getFileLines(char* filename);
 char* fileToString(char* filename);
-char** loadFilesList();
+char** loadFilesNamesList();
 char** loadBlackList();
-
+char* removeElementsFromArray(char* pText);
+char** splitText(char* pText, char* pDelimeters);
 
 int findVariablesTraces(const char * pCode, char** pBlackList);
 int findRepeatedCodeTraces();
@@ -35,7 +47,7 @@ int findVariablesTraces(const char * pCode, char** pBlackList){
 
         if (strstr( codeBackup, currentVariable ) != NULL){            //O(n) if we take the len of pCode as our n
             //Lines to  check position and variable found
-            printf( "\nPosition: %d\n", (int)(strstr( codeBackup, currentVariable )-pCode));
+            //printf( "\nPosition: %d\n", (int)(strstr( codeBackup, currentVariable )-pCode));
             //printf("\n%s", currentVariable);
             ++tracesFound;
         }
@@ -47,8 +59,18 @@ int findVariablesTraces(const char * pCode, char** pBlackList){
 }
 
 int findRepeatedCodeTraces(const char * pCode){
-    /*
-*/
+    int repeatedLines = 0;
+    char **codeLines = splitText(pCode, "\n");      //O(n)
+    int linesAmount = countApparition(pCode, "\n"); //O(n)
+
+    int linesToBeCompare = (int) linesAmount/2;
+    int linesToBeCompareAgainst = (int) linesAmount/3;
+
+    for (int linesCompared = 0; linesCompared < linesToBeCompare; linesCompared++){
+
+    }
+
+    return 0;
 }
 
 /**
@@ -60,37 +82,71 @@ int findRepeatedCodeTraces(const char * pCode){
 */
 
 int findExceptionTraces(const char * pCode){
-    int publicFound = 0;
-    int throwFound = 0;
 
+    //Public 'methods' found
+    int publicFound = countApparition(pCode, " public ");
 
-    //while ( currentVariable != NULL  ) {                    //O(c) if we make a little cheating
-    const char *codeBackup = pCode;
+    //Control except found in the code
+    int exceptControlFound = countApparition(pCode, "throw new") + countApparition(pCode, "catch");
+
+    int result = publicFound - exceptControlFound;
+
+    /*
+    printf("\n%d", publicFound);
+    printf("\n%d", exceptControlFound);
+    printf("\n");
+    */
+
+    if (result > 0)
+        return result;
+    else return 0;
+}
+
+int countApparition(const char * pText, const char* pSearchWord){
+    const char *textBackup = pText;
+    int apparitionFound = 0;
     //Pendiente: Revisar porque while(codeBackup) != NULL No funciona
 
-    while (strstr( codeBackup, "public" ) != NULL){
-        int position = (int) (strstr( codeBackup, "public" )-pCode);
-        publicFound++;
-        codeBackup = pCode + position+1;
+    while (strstr( textBackup, pSearchWord ) != NULL){
+        int position = (int) (strstr( textBackup, pSearchWord )-pText);
+        apparitionFound++;
+        textBackup = pText + position+1;
     }
 
-    codeBackup = pCode; //Backup its made again so the process can be reapeated whith Throw
-
-
-    while (strstr( codeBackup, "Throw" ) != NULL){
-        //printf( "\nPosition: %d\n", (int)(codeBackup-pCode));
-        //printf("\n%s", currentVariable);
-        codeBackup++;
-        throwFound++;
-    }
-    printf("%d", publicFound);
-    printf("\n%d", throwFound);
-    return publicFound - throwFound;
-
+    return apparitionFound;
 }
 
 int findMagicNumberTraces(const char * pCode){
-    char * tokensToMagicNumbers[] = {"<", ">", "==", "<=", ">=", "!=", "+", "-", "*", "/", "%"};  //Se buscan los que esten a la derecha
+    char * tokensToMagicNumbers[] = {"<", ">", "==", "<=", ">=", "!=", "+", "-", "*", "/", "%", NULL};  //Se buscan los que esten a la derecha
+    pCode = removeElementsFromArray(strdup(pCode));
+
+    int tokenLenght;
+    int currentTokenIndex = 0;
+    int counter = 0;
+    char* currentToken = *(tokensToMagicNumbers + currentTokenIndex);
+
+    while ( currentToken != NULL){
+        tokenLenght = strlen(currentToken);
+
+        const char *textBackup = pCode;                     //Set the backup so it can be readable and modifiable
+        while (strstr( textBackup, currentToken ) != NULL){
+            int position = (int) (strstr( textBackup, currentToken )-pCode);
+            textBackup = pCode + position;                  //Set the backup at the token start
+
+            if (isdigit(*(textBackup - 1)) )            //Checks the character before token
+                counter++;
+            if (isdigit(*(textBackup + tokenLenght)) )  //Checks the character after token
+                counter++;
+
+            textBackup++;   //Moves the pointer so we can read the next occurrence
+        }
+
+
+        currentTokenIndex++;
+        currentToken = *(tokensToMagicNumbers + currentTokenIndex);
+    }
+
+    return counter;
 }
 
 
@@ -98,22 +154,12 @@ int findMagicNumberTraces(const char * pCode){
 /**
     Returns the number of lines contain in the file.
 
-    @param filename: the name of the file thats going to be used.
+    @param
     @return the number of lines.
 */
 
 int getFileLines(char * const pSringText){
-    int lines = 0;
-    size_t stringLenght = strlen(pSringText);
-
-    if (stringLenght != 0){
-        lines++;
-        for (int currentChar = 0; currentChar < stringLenght; currentChar++) {
-          if(pSringText[currentChar] == '\n')
-            lines++;
-        }
-    }
-    return lines;
+    return countApparition(pSringText, "\n") + 1;
 }
 
 
@@ -121,7 +167,9 @@ char* fileToString(char* filename){
     FILE *filePointer = fopen(filename, "r");
 
     if (filePointer == NULL){
-        printf("No funco");
+        printf("No se pudo abrir el archivo ");
+        printf(filename);
+        printf("\n");
         return NULL;
     }
 
@@ -132,10 +180,11 @@ char* fileToString(char* filename){
     char* body = malloc(fileLenght);
     fread(body, 1, fileLenght, filePointer);
 
+    fclose(filePointer);
     return body;
 }
 
-char** loadFilesList(){
+char** loadFilesNamesList(){
     DIR *dir;
     struct dirent *ent;
     char** fileNames = (char **) malloc(sizeof(char*));
@@ -150,7 +199,7 @@ char** loadFilesList(){
             }
 
         }
-        closedir (dir);
+        closedir (dir);  //Close conections
     } else {
       /* could not open directory */
       return NULL;
@@ -160,6 +209,18 @@ char** loadFilesList(){
     return fileNames;
 }
 
+char** loadFilesList(char** pFileNames){
+    char* fileName = (char*) malloc(sizeof(char));
+    char** filesResult = (char**) malloc(sizeof(char*));
+
+    int nameIndex = 0;
+
+    while (*(pFileNames +nameIndex)!= NULL){
+        nameIndex++;
+    }
+
+    return NULL;
+}
 
 char** loadBlackList(){
     char * blackListTXT =  fileToString("BlackList.txt");
@@ -169,8 +230,10 @@ char** loadBlackList(){
     char ** blackList = (char **) malloc(sizeof(char*));
     int wordsCount = 0;
     while (word != NULL){
-        *(blackList + wordsCount) = malloc(sizeof(char));
-        const char * currentVariable = (const char *) strdup(word);
+        *(blackList + wordsCount) = (char*) malloc(sizeof(char));
+        const char * currentVariable = (char*) malloc(sizeof(char));
+
+        currentVariable = (const char *) strdup(word);
         //*(blackList + wordsCount) = strdup(word);
         strcpy(*(blackList + wordsCount), " ");
         strcat(*(blackList + wordsCount), currentVariable);
@@ -178,58 +241,79 @@ char** loadBlackList(){
         //printf ("\n%s",word);
 
         word = strtok (NULL, "\n ,.;\0");
+        free(currentVariable);
         wordsCount++;
     }
 
     *(blackList + wordsCount) = NULL;
+    free(word);
     return blackList;
 }
 
-int main(){
-    printf("Tarea Corta 2-10%\tGeneticos y paralelos\n");
-    printf("Oscar Cortes Cordero\t20116136191\n\n");
-    printf("Los codigos a evaluarse son:\n");
-
-    char** fileNames = loadFilesList(); //The program files from Code/ are called
-    int currentFile = 0;
-    while (*(fileNames + currentFile) != NULL) {
-        printf( *(fileNames + currentFile) );
-        printf("\n");
-        currentFile++;
-    }
-
-    printf("\n---+++---+++---+++---+++---+++---+++---+++---+++---+++---+++\n");
-
-
-    //char str[] ="- This, a sample string.";
-    char ** blackList = loadBlackList();
+char** splitText(char* pText, char* pDelimeters){
+    char** textResult = (char **) malloc(sizeof(char*));
+    char * word = (char*) malloc(sizeof(char));
+    word = strtok (pText, pDelimeters);
 
     int wordsCount = 0;
-    while (*(blackList + wordsCount) != NULL) {
-        printf("%s", *(blackList + wordsCount) );
-        printf("\n");
+    while (word != NULL){
+        word = strtok (NULL, pDelimeters);
+
+        *(textResult + wordsCount) = (const char *) strdup(word);
         wordsCount++;
     }
 
+    *(textResult + wordsCount) = NULL;
+    return textResult;
+}
 
-    //Future fuction to load blacklist
+char* removeElementsFromArray(char* pText){
+    char *write = pText, *read = pText;
+
+    do {
+    if (*read != ' ')
+       *write++ = *read;
+    } while (*read++);
+
+    return pText;
+}
+
+
+int main(){
+    printf("Tarea Corta 2-10%\nSherlock\tAlgoritmos geneticos y paralelismo");
+    printf("\nOscar Cortes Cordero\t20116136191");
+    printf("\nLeyendo codigos dentro de la carpeta Code...\n");
+    char** fileNames = loadFilesNamesList(); //The program files from Code/ are called
+    char** listCodeString = (char** const) malloc(sizeof(char * const));
+
+    printf("\n\nLos codigos encontrados son:\n");
+    int currentFile = 0;
+
+    while ( *(fileNames + currentFile) != NULL) {
+        printf("\n");
+        printf(*(fileNames + currentFile));
+        currentFile++;
+    }
+
+    listCodeString = loadFilesList(fileNames);
+
+    printf("\n---+++---+++---+++---+++---+++---+++---\n");
+    char ** blackList = loadBlackList();
+    int variablesSum = 0;
+    int magicNumbersSum = 0;
+    int exceptionSum = 0;
+    int repeatedCodeSum = 0;
+
+    //Part to make this paralelo(?
 
     char * const fileString = (char * const) fileToString("Codes/J-ArrayList.jar");
 
-    findVariablesTraces(fileString, blackList);
-    printf("Public with no throw %d", findExceptionTraces(fileString));
-    puts("\nThe hell:");
+    printf("\nNumber of blacklist variables: %d.",findVariablesTraces(fileString, blackList));
+    printf("\nPublic with no throw: %d.", findExceptionTraces(fileString));
+    printf("\nNagicNumbers found: %d.", findMagicNumberTraces(fileString));
+    printf("\nRepeated code lines found: %d.", findRepeatedCodeTraces(fileString));
 
-    puts(strstr("Hola", "ola "));
-    puts("Amount2: ");
-    printf("%d", strlen(fileString) );
-
-    int linesAmount = getFileLines(fileString); //O(n)
-    puts("Counter done\n");
-    printf("Lines: %d", linesAmount);
-
-    //printf ("%s",fileString);
-    printf("\nEnd");
+    printf("\n\n\nEnd");
 
     return 0;
 }
