@@ -18,11 +18,20 @@
 	<time.h>
 	<stdlib.h>
 
-1528686017 source:c:\users\Òscar cortes\documents\github\sherlockcode\main.c
+1528784283 source:c:\users\Òscar cortes\documents\github\sherlockcode\main.c
 	<stdio.h>
 	<stdlib.h>
-	<assert.h>
 	<string.h>
-	<dirent.h>
 	<ctype.h>
+	<omp.h>
+	"Files.h"
+
+1528771267 c:\users\Òscar cortes\documents\github\sherlockcode\files.c
+	"Files.h"
+	<dirent.h>
+	<stdlib.h>
+	<string.h>
+	<stdio.h>
+
+1528771143 c:\users\Òscar cortes\documents\github\sherlockcode\files.h
 
